@@ -1,6 +1,5 @@
 part of link_preview;
 
-
 class WebPageParser {
   static Future<LinkMetaData> getData(String url) async {
     var response = await http.get(url);
@@ -83,7 +82,7 @@ class WebPageParser {
     return document.head.querySelectorAll("[property*='og:']");
   }
 
-  static String _addWWWPrefixIfNotExists(String uri) {
+  static String addWWWPrefixIfNotExists(String uri) {
     if (uri == null || uri == "") {
       return uri;
     }
