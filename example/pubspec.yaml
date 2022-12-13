@@ -1,11 +1,10 @@
 name: link_preview_example
 description: A Flutter package to render a link preview inspired by link_previewer
 version: 0.0.1
-author: Jamal Shr <me@shrjamal.com>
 homepage: https://github.com/shrjamal/link-preview
-
+publish_to: none
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -18,4 +17,3 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
-
