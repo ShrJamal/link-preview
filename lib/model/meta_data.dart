@@ -1,18 +1,45 @@
 library link_preview;
 
-import 'package:freezed_annotation/freezed_annotation.dart';
+class LinkMetaData {
+  final String title;
+  final String description;
+  final String image;
+  LinkMetaData({
+    required this.title,
+    required this.description,
+    required this.image,
+  });
 
-part 'meta_data.g.dart';
-part 'meta_data.freezed.dart';
+  factory LinkMetaData.fromMap(Map<String, dynamic> map) {
+    return LinkMetaData(
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      image: map['image'] ?? '',
+    );
+  }
 
-@freezed
-abstract class LinkMetaData with _$LinkMetaData {
-  const factory LinkMetaData({
-    @JsonKey(defaultValue: '') String title,
-    @JsonKey(defaultValue: '') String description,
-    @JsonKey(defaultValue: '') String image,
-  }) = _LinkMetaData;
+  List<Object> get props => [title, description, image];
 
-  factory LinkMetaData.fromJson(Map<String, dynamic> json) =>
-      _$LinkMetaDataFromJson(json);
+  LinkMetaData copyWith({
+    String? title,
+    String? description,
+    String? image,
+  }) {
+    return LinkMetaData(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      image: image ?? this.image,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'image': image,
+    };
+  }
+
+  String toString() =>
+      'LinkMetaData(title: $title, description: $description, image: $image)';
 }

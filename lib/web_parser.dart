@@ -1,13 +1,21 @@
 part of link_preview;
 
 class WebPageParser {
-  static Future<LinkMetaData> getData(String url) async {
-    var response = await http.get(url);
+  static String addWWWPrefixIfNotExists(String uri) {
+    if (uri.isEmpty) return uri;
+    final parsedUri = Uri.parse(uri);
+    if (!parsedUri.host.startsWith('www')) {
+      return parsedUri.replace(host: 'www.' + parsedUri.host).toString();
+    }
+    return '';
+  }
 
+  static Future<LinkMetaData?> getData(String url) async {
+    final response = await http.get(Uri.parse(url));
     return getDataFromResponse(response, url);
   }
 
-  static LinkMetaData getDataFromResponse(http.Response response, String url) {
+  static LinkMetaData? getDataFromResponse(http.Response response, String url) {
     var requiredAttributes = ['title', 'image', 'description'];
     if (response.statusCode == 200) {
       var data = {};
@@ -15,8 +23,8 @@ class WebPageParser {
       var openGraphMetaTags = _getOgPropertyData(document);
 
       openGraphMetaTags.forEach((element) {
-        var ogTagTitle = element.attributes['property'].split("og:")[1];
-        var ogTagValue = element.attributes['content'];
+        var ogTagTitle = element.attributes['property']?.split("og:")[1];
+        var ogTagValue = element.attributes['content'] ?? '';
         if (requiredAttributes.contains(ogTagTitle)) {
           if (ogTagTitle == "image" &&
               !ogTagValue.startsWith(RegExp(r'https?://'))) {
@@ -26,7 +34,7 @@ class WebPageParser {
           }
         }
       });
-      final meta = LinkMetaData.fromJson({...data});
+      final meta = LinkMetaData.fromMap({...data});
       return meta.copyWith.call(
         title: meta.title.isEmpty ? _scrapeTitle(document) : meta.title,
         description: meta.description.isEmpty
@@ -43,29 +51,28 @@ class WebPageParser {
     return uri.host;
   }
 
-  static String _scrapeTitle(Document document) {
-    final ele = document.head.getElementsByTagName("title") ?? [];
-    return ele.isEmpty ? "" : ele[0].text ?? "";
+  static List<Element> _getOgPropertyData(Document document) {
+    return document.head?.querySelectorAll("[property*='og:']") ?? [];
   }
 
   static String _scrapeDescription(Document document) {
-    var meta = document.getElementsByTagName("meta");
-    var metaDescription = meta.firstWhere(
-      (e) => e.attributes["name"] == "description",
-      orElse: () => null,
-    );
+    try {
+      final meta = document.getElementsByTagName("meta");
+      final metaDescription = meta.firstWhere(
+        (e) => e.attributes["name"] == "description",
+      );
 
-    return metaDescription == null
-        ? ""
-        : metaDescription.attributes["content"] ?? '';
+      return metaDescription.attributes["content"] ?? '';
+    } catch (e) {
+      return '';
+    }
   }
 
   static String _scrapeImage(Document document, String url) {
-    var images = document.body.getElementsByTagName("img");
+    final images = document.body?.getElementsByTagName("img") ?? [];
     var imageSrc = "";
-    if (images.length > 0) {
-      imageSrc = images[0].attributes["src"];
-
+    if (images.isNotEmpty) {
+      imageSrc = images[0].attributes["src"] ?? '';
       if (!imageSrc.startsWith("http")) {
         imageSrc = "http://" + _extractHost(url) + imageSrc;
       }
@@ -78,20 +85,8 @@ class WebPageParser {
     return imageSrc;
   }
 
-  static List<Element> _getOgPropertyData(Document document) {
-    return document.head.querySelectorAll("[property*='og:']");
-  }
-
-  static String addWWWPrefixIfNotExists(String uri) {
-    if (uri == null || uri == "") {
-      return uri;
-    }
-
-    Uri prefixUri;
-    Uri parsedUri = Uri.parse(uri);
-    if (!parsedUri.host.startsWith('www')) {
-      prefixUri = parsedUri.replace(host: 'www.' + parsedUri.host);
-    }
-    return prefixUri.toString();
+  static String _scrapeTitle(Document document) {
+    final ele = document.head?.getElementsByTagName("title") ?? [];
+    return ele.isEmpty ? "" : ele[0].text;
   }
 }

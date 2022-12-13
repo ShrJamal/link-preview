@@ -1,45 +1,34 @@
 part of link_preview;
 
 class LinkPreviewWidget extends StatefulWidget {
-  LinkPreviewWidget({
-    Key key,
-    @required this.url,
-    @required this.metaData,
-    @required this.onTap,
-    this.titleFontSize,
-    this.bodyFontSize,
-    this.showTitle,
-    this.showBody,
-    this.bodyTextOverflow,
-    this.bodyMaxLines,
-  })  : assert(metaData != null),
-        assert(url != null),
-        assert(onTap != null),
-        super(key: key);
-
   final String url;
   final LinkMetaData metaData;
   final Function onTap;
-  final double titleFontSize;
-  final double bodyFontSize;
-  final bool showTitle;
+  final double? titleFontSize;
+  final double? bodyFontSize;
+  final bool? showTitle;
   final bool showBody;
-  final TextOverflow bodyTextOverflow;
-  final int bodyMaxLines;
+  final TextOverflow? bodyTextOverflow;
+  final int? bodyMaxLines;
+
+  LinkPreviewWidget({
+    Key? key,
+    required this.url,
+    required this.metaData,
+    required this.onTap,
+    this.titleFontSize,
+    this.bodyFontSize,
+    this.showTitle,
+    this.showBody = true,
+    this.bodyTextOverflow,
+    this.bodyMaxLines,
+  }) : super(key: key);
 
   @override
   _LinkPreviewWidgetState createState() => _LinkPreviewWidgetState();
 }
 
 class _LinkPreviewWidgetState extends State<LinkPreviewWidget> {
-  double computeTitleFontSize(double height) {
-    double size = height * 0.13;
-    if (size > 15) {
-      size = 15;
-    }
-    return size;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -96,5 +85,9 @@ class _LinkPreviewWidgetState extends State<LinkPreviewWidget> {
         ),
       ),
     );
+  }
+
+  double computeTitleFontSize(double height) {
+    return max(height * 0.13, 15);
   }
 }
